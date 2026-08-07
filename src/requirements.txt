@@ -1,3 +1,4 @@
-python-rich
 python-nmap
-nmap
+subprocesses
+python-rich
+
