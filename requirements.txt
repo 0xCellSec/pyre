@@ -1,4 +1,3 @@
 python-nmap
-subprocesses
-python-rich
-
+rich
+pyyaml
