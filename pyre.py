@@ -2,17 +2,21 @@ import argparse
 import nmap
 import shutil
 import subprocess
+import yaml
 import os
 from rich import print as rprint
 
 
 def check_dependencies():
-    REQUIRED_TOOLS = ["ffuf", "whatweb", "nikto", "nmap"]
+    REQUIRED_TOOLS = ["ffuf", "whatweb", "nmap"]
+    missing_tool = False
     for tool in REQUIRED_TOOLS:
         if shutil.which(tool) == None:
             rprint(
                 f"[bold red]\\[!] MISSING REQUIRED TOOL: {tool}[/bold red]",
             )
+            missing_tool = True
+    return missing_tool
 
 
 def run_nmap(target_ip):
@@ -36,15 +40,28 @@ def run_nmap(target_ip):
                 )
 
 
-def run_ffuf(target_ip):
+def run_whatweb(target_webpage):
+    rprint("[bold blue]\\[+] Running whatweb [bold blue]")
+    subprocess.Popen(["whatweb", target_webpage])
 
+
+def run_directory_ffuf(target_webpage, wordlist_path):
+    subprocess.Popen(
+        ["ffuf", "-ac", "-u", f"http://{target_webpage}", "-w", wordlist_path],
+    )
+
+
+def run_subdirectory_ffuf(target_webpage, subdirectory_worlist_path):
     subprocess.Popen(
         [
             "ffuf",
+            "-ac",
             "-u",
-            f"http://{target_ip}",
+            f"http://{target_webpage}",
+            "-H",
+            f"Host:FUZZ.{target_webpage}",
             "-w",
-            "/usr/share/wordlists/seclists/Discovery/Web-Content/DirBuster-2007_directory-list-2.3-small.txt",
+            subdirectory_worlist_path,
         ]
     )
 
@@ -59,9 +76,15 @@ def main():
     parser.add_argument("-H", "--host")
     args = parser.parse_args()
 
-    check_dependencies()
+    with open("config.yaml", "r", encoding="utf-8") as file:
+        data = yaml.safe_load(file)
+
+    if check_dependencies() == True:
+        return
+
     run_nmap(args.scan)
-    run_ffuf(args.scan)
+    run_directory_ffuf(data["webpage"], data["directory_wordlist"])
+    run_subdirectory_ffuf(data["webpage"], data["subdirectory_wordlist"])
 
 
 main()
