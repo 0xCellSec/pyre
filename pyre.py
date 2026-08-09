@@ -79,51 +79,14 @@ def check_dependencies():
     return missing_tool
 
 
-def run_nmap(target_ip):
-    # initializing important decleration
-    nm = nmap.PortScanner()
-
-    # scans target's top 1000 ports
-    nm.scan(target_ip, "1-1000", arguments="-T5 -sC -sV -oN pyre_output.txt")
-
-    for host in nm.all_hosts():
-        print(f"Target: {host}")
-        print(f"State: {nm[host].state()}")
-        print("---------------------------------")
-        for protocol in nm[host].all_protocols():
-            port_list = nm[host][protocol].keys()
-
-            for port in sorted(port_list):
-                port_info = nm[host][protocol][port]
-                print(
-                    f"{port}\t{port_info['state']}\t{port_info['name']}\t{port_info['product']}\t{port_info['version']}\n"
-                )
+def handle_web_recon():
+    tools = Tools()
+    # tools.run_whatweb()
+    tools.run_directory_ffuf()
+    tools.run_subdirectory_ffuf()
 
 
-def run_whatweb(target_webpage):
-    rprint("[bold blue]\\[+] Running whatweb [bold blue]")
-    subprocess.Popen(["whatweb", target_webpage])
-
-
-def run_directory_ffuf(target_webpage, wordlist_path):
-    subprocess.Popen(
-        ["ffuf", "-ac", "-u", f"http://{target_webpage}", "-w", wordlist_path],
-    )
-
-
-def run_subdirectory_ffuf(target_webpage, subdirectory_worlist_path):
-    subprocess.Popen(
-        [
-            "ffuf",
-            "-ac",
-            "-u",
-            f"http://{target_webpage}",
-            "-H",
-            f"Host:FUZZ.{target_webpage}",
-            "-w",
-            subdirectory_worlist_path,
-        ]
-    )
+DISPATCH = {"80": handle_web_recon}
 
 
 def main():
