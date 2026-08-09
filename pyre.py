@@ -3,8 +3,67 @@ import nmap
 import shutil
 import subprocess
 import yaml
-import os
 from rich import print as rprint
+
+
+class Tools:
+    def __init__(self):
+        with open("config.yaml", "r", encoding="utf-8") as file:
+            self.data = yaml.safe_load(file)
+
+    def run_nmap(self, target_ip):
+        # initializing important decleration
+        nm = nmap.PortScanner()
+        post_scan_list = []
+
+        # scans target's top 1000 ports
+        nm.scan(target_ip, "1-1000", arguments="-T5 -sC -sV -oN pyre_output.txt")
+
+        for host in nm.all_hosts():
+            print(f"Target: {host}")
+            print(f"State: {nm[host].state()}")
+            print("---------------------------------")
+            for protocol in nm[host].all_protocols():
+                port_list = nm[host][protocol].keys()
+
+                for port in sorted(port_list):
+                    port_info = nm[host][protocol][port]
+                    print(
+                        f"{port}\t{port_info['state']}\t{port_info['name']}\t{port_info['product']}\t{port_info['version']}\n"
+                    )
+                    post_scan_list.append(str(port))
+
+        return port_list
+
+    def run_whatweb(self):
+        rprint("[bold blue]\\[+] Running whatweb [bold blue]")
+        subprocess.Popen(["whatweb", self.data["webpage"]])
+
+    def run_directory_ffuf(self):
+        subprocess.Popen(
+            [
+                "ffuf",
+                "-ac",
+                "-u",
+                f"http://{self.data['webpage']}",
+                "-w",
+                self.data["directory_wordlist"],
+            ],
+        )
+
+    def run_subdirectory_ffuf(self):
+        subprocess.Popen(
+            [
+                "ffuf",
+                "-ac",
+                "-u",
+                f"http://{self.data['webpage']}",
+                "-H",
+                f"Host:FUZZ.{self.data['webpage']}",
+                "-w",
+                self.data["subdirectory_wordlist"],
+            ]
+        )
 
 
 def check_dependencies():
