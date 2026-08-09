@@ -67,6 +67,7 @@ class Tools:
 
 
 def check_dependencies():
+    # update this everytime a new tool is added
     REQUIRED_TOOLS = ["ffuf", "whatweb", "nmap"]
     missing_tool = False
     for tool in REQUIRED_TOOLS:
