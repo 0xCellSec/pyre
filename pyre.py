@@ -98,9 +98,6 @@ def main():
     parser.add_argument("-w", "--web", help="only does web recon")
     args = parser.parse_args()
 
-    with open("config.yaml", "r", encoding="utf-8") as file:
-        data = yaml.safe_load(file)
-
     if check_dependencies() == True:
         return
 
