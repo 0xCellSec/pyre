@@ -101,9 +101,10 @@ def main():
     if check_dependencies() == True:
         return
 
-    run_nmap(args.scan)
-    run_directory_ffuf(data["webpage"], data["directory_wordlist"])
-    run_subdirectory_ffuf(data["webpage"], data["subdirectory_wordlist"])
+    tools = Tools()
+    for port in tools.run_nmap(args.scan):
+        if str(port) in DISPATCH:
+            DISPATCH[str(port)]()
 
 
 main()
