@@ -95,8 +95,7 @@ def main():
         description="PYRE's your recon engine, is an auotmated recon tool to facilitate the initial recone stage",
     )
     parser.add_argument("-s", "--scan", help="-s <ip address>", type=str)
-    parser.add_argument("-w", "--wordlist", help="-w path/to/wordlist.txt")
-    parser.add_argument("-H", "--host")
+    parser.add_argument("-w", "--web", help="only does web recon")
     args = parser.parse_args()
 
     with open("config.yaml", "r", encoding="utf-8") as file:
