@@ -33,7 +33,7 @@ class Tools:
                     )
                     post_scan_list.append(str(port))
 
-        return port_list
+        return post_scan_list
 
     def run_whatweb(self):
         subprocess.Popen(["whatweb", self.data["webpage"]])
@@ -107,9 +107,14 @@ def main():
         return
 
     tools = Tools()
-    for port in tools.run_nmap(args.scan):
-        if str(port) in DISPATCH:
-            DISPATCH[str(port)]()
+    if tools.run_nmap(args.scan):
+        for port in tools.run_nmap(str(args.scan)):
+            if str(port) in DISPATCH:
+                DISPATCH[str(port)]()
+    else:
+        rprint("[bold red]\\[!] Ports scan is empty[bold red]")
+        rprint("[bold blue]\\[+] Opening scan result for manual check")
+        subprocess.Popen(["cat", "pyre_output.txt"])
 
 
 main()
