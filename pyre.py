@@ -42,9 +42,13 @@ class Tools:
         subprocess.Popen(
             [
                 "ffuf",
+                "-t",
+                str(self.data["ffuf_concurrency"]),
                 "-ac",
                 "-u",
                 f"http://{self.data['webpage']}",
+                "-H",
+                f"Host:{self.data['webpage']}/FUZZ",
                 "-w",
                 self.data["directory_wordlist"],
             ],
@@ -54,6 +58,8 @@ class Tools:
         subprocess.Popen(
             [
                 "ffuf",
+                "-t",
+                str(self.data["ffuf_concurrency"]),
                 "-ac",
                 "-u",
                 f"http://{self.data['webpage']}",

@@ -1,4 +1,5 @@
 
 webpage: whatweb.com
+ffuf_concurrency: 40
 directory_wordlist: path/to/worlist
 subdirectory_wordlist: path/to/wordlist
