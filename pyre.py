@@ -36,7 +36,6 @@ class Tools:
         return port_list
 
     def run_whatweb(self):
-        rprint("[bold blue]\\[+] Running whatweb [bold blue]")
         subprocess.Popen(["whatweb", self.data["webpage"]])
 
     def run_directory_ffuf(self):
