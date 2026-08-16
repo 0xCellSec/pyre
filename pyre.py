@@ -35,9 +35,6 @@ class Tools:
 
         return list_ports
 
-    def run_whatweb(self):
-        subprocess.Popen(["whatweb", self.data["webpage"]])
-
     def run_directory_ffuf(self):
         subprocess.Popen(
             [
@@ -73,7 +70,7 @@ class Tools:
 
 def has_all_dependencies():
     # update this everytime a new tool is added
-    LIST_REQUIRED_TOOLS = ["ffuf", "whatweb", "nmap"]
+    LIST_REQUIRED_TOOLS = ["ffuf", "nmap"]
     is_tool_missing = False
     for tool in LIST_REQUIRED_TOOLS:
         if shutil.which(tool) == None:
