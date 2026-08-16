@@ -83,7 +83,6 @@ def has_all_dependencies():
 
 def call_web_recon_tools():
     tools = Tools()
-    # tools.run_whatweb()
     tools.run_directory_ffuf()
     tools.run_subdirectory_ffuf()
 
