@@ -107,8 +107,10 @@ def main():
         return
 
     tools = Tools()
-    if tools.run_nmap(args.scan):
-        for port in tools.run_nmap(str(args.scan)):
+
+    nmap_results = tools.run_nmap(args.scan)
+    if nmap_results:
+        for port in nmap_results:
             if str(port) in DISPATCH:
                 DISPATCH[str(port)]()
     else:
