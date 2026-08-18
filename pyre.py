@@ -11,10 +11,10 @@ class Tools:
         with open("config.yaml", "r", encoding="utf-8") as file:
             self.data = yaml.safe_load(file)
 
-    def run_nmap_and_fetch_port_list(self, target_ip):
+    def run_nmap_and_fetch_service_to_ports(self, target_ip):
         # initializing important decleration
         nm = nmap.PortScanner()
-        list_ports = []
+        service_to_ports = {}
 
         # scans target's top 1000 ports
         nm.scan(target_ip, "1-1000", arguments="-T5 -sC -sV -oN pyre_output.txt")
@@ -31,11 +31,11 @@ class Tools:
                     print(
                         f"{port}\t{port_info['state']}\t{port_info['name']}\t{port_info['product']}\t{port_info['version']}\n"
                     )
-                    list_ports.append(str(port))
+                    service_to_ports[str(port_info["name"])] = str(port)
 
-        return list_ports
+        return service_to_ports
 
-    def run_directory_ffuf(self):
+    def run_directory_ffuf(self, port):
         subprocess.Popen(
             [
                 "ffuf",
@@ -43,15 +43,15 @@ class Tools:
                 str(self.data["ffuf_concurrency"]),
                 "-ac",
                 "-u",
-                f"http://{self.data['webpage']}",
+                f"http://{self.data['webpage']}{port}",
                 "-H",
-                f"Host:{self.data['webpage']}/FUZZ",
+                f"Host:{self.data['webpage']}{port}/FUZZ",
                 "-w",
                 self.data["directory_wordlist"],
             ],
         )
 
-    def run_subdirectory_ffuf(self):
+    def run_subdirectory_ffuf(self, port):
         subprocess.Popen(
             [
                 "ffuf",
@@ -59,9 +59,9 @@ class Tools:
                 str(self.data["ffuf_concurrency"]),
                 "-ac",
                 "-u",
-                f"http://{self.data['webpage']}",
+                f"http://{self.data['webpage']}{port}",
                 "-H",
-                f"Host:FUZZ.{self.data['webpage']}",
+                f"Host:FUZZ.{self.data['webpage']}{port}",
                 "-w",
                 self.data["subdirectory_wordlist"],
             ]
@@ -81,13 +81,17 @@ def has_all_dependencies():
     return is_tool_missing
 
 
-def call_web_recon_tools():
+def call_web_recon_tools(port):
+    if port == "80":
+        port = ""
+    else:
+        port = f":{port}"
     tools = Tools()
-    tools.run_directory_ffuf()
-    tools.run_subdirectory_ffuf()
+    tools.run_directory_ffuf(port)
+    tools.run_subdirectory_ffuf(port)
 
 
-FETCH_TOOL_COMMAND = {"80": call_web_recon_tools}
+FETCH_TOOL_COMMAND = {"http": call_web_recon_tools}
 
 
 def main():
@@ -104,11 +108,11 @@ def main():
 
     tools = Tools()
 
-    has_nmap_results = tools.run_nmap_and_fetch_port_list(args.scan)
+    has_nmap_results = tools.run_nmap_and_fetch_service_to_ports(args.scan)
     if has_nmap_results:
-        for port in has_nmap_results:
-            if str(port) in FETCH_TOOL_COMMAND:
-                FETCH_TOOL_COMMAND[str(port)]()
+        for service in has_nmap_results:
+            if service in FETCH_TOOL_COMMAND:
+                FETCH_TOOL_COMMAND[service](has_nmap_results[service])
     else:
         rprint("[bold red]\\[!] Ports scan is empty[bold red]")
         rprint("[bold blue]\\[+] Opening scan result for manual check")
